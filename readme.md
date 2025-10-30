@@ -1,4 +1,4 @@
-## Inn-hub (Backend)
+## Inn-Hub (Backend)
 
 Backend do projeto [To Do List (React)](https://github.com/alanlucascruz/react-to-do-list).
 
@@ -18,9 +18,17 @@ Cria o arquivo package.json.
 
 Pacotes para a execução de TypeScript no Node.js.
 
-### `npm install express @types/express`
+### `npm install express`
+
+### `npm install @types/express -D`
 
 Instala o Express, que serve para gerenciar rotas.
+
+### `npm i cors`
+
+### `npm install @types/cors -D`
+
+Instala o CORS para controle de rotas
 
 ### `npm install mongoose`
 

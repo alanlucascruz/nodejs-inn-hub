@@ -1,21 +1,23 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express } from "express";
+import cors from "cors";
+import routes from "./routes";
 
 const app: Express = express();
 const port: Number = 3001;
 
-app.use(express.json());
+const applyMiddlewares = () => {
+  app.use(cors());
+  app.use(express.json());
+  app.use("/", routes);
+};
 
-interface IUser {
-    nome: string,
-    sobrenome: string,
-}
-
-app.get('/user', (req: Request<{}, {}, {}, IUser>, res: Response) => {
-    const user: IUser = req.query;
-
-    res.status(200).json(user);
-})
-
-app.listen(port, () => {
+const startServer = () => {
+  app.listen(port, () => {
     console.log(`Servidor iniciado: http://localhost:${port}`);
-});
+  });
+};
+
+(() => {
+  applyMiddlewares();
+  startServer();
+})();
