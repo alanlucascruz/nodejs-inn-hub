@@ -50,7 +50,15 @@ Instala o Bcryptjs, que criptografa senhas do banco de dados.
 
 ### `npm install jsonwebtoken`
 
+### `npm install @types/jsonwebtoken -D`
+
 Instala o JSONWebToken, que cria Tokens criptografados
+
+### `npm install http-status-codes`
+
+### `npm install @types/http-status-codes -D`
+
+Instala um pacote com Enums de HTTP Status Codes
 
 ### `npm i`
 

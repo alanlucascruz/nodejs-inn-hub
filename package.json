@@ -10,7 +10,6 @@
   "author": "Alan Lucas da Cruz",
   "license": "MIT",
   "dependencies": {
-    "@types/http-status-codes": "^1.2.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -22,6 +21,8 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
+    "@types/http-status-codes": "^1.2.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.9.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
