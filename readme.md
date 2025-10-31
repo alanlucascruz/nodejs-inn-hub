@@ -1,7 +1,5 @@
 ## Inn-Hub (Backend)
 
-Backend do projeto [To Do List (React)](https://github.com/alanlucascruz/react-to-do-list).
-
 ---
 
 ## Iniciar o Projeto
