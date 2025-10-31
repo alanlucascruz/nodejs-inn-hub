@@ -1,7 +1,5 @@
 ## Inn-Hub (Backend)
 
----
-
 ## Iniciar o Projeto
 
 ### `npm init`
