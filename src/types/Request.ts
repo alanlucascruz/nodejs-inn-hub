@@ -1,3 +1,3 @@
-export interface IdRequest {
+export interface IdReqParams {
   id: number;
 }

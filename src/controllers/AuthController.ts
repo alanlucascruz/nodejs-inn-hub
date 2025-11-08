@@ -7,22 +7,22 @@ import bcrypt from "bcryptjs";
 import User from "../models/User";
 import {
   User as IUser,
-  SignInRequest,
+  SignInReqBody,
   SignInContent,
-  SignInResponse,
-  SignUpRequest,
+  SignInResBody,
+  SignUpReqBody,
   SignUpContent,
-  SignUpResponse,
+  SignUpResBody,
 } from "../types";
 
 const JWT_SECRET: string = <string>process.env.JWT_SECRET || "";
 
 export const signIn = async (
-  req: Request<{}, {}, SignInRequest>,
-  res: Response<SignInResponse>
+  req: Request<{}, {}, SignInReqBody>,
+  res: Response<SignInResBody>
 ) => {
   try {
-    const { email, password }: SignInRequest = req.body;
+    const { email, password }: SignInReqBody = req.body;
 
     const user: HydratedDocument<IUser> | null = await User.findOne({
       email,
@@ -63,11 +63,11 @@ export const signIn = async (
 };
 
 export const signUp = async (
-  req: Request<{}, {}, SignUpRequest>,
-  res: Response<SignUpResponse>
+  req: Request<{}, {}, SignUpReqBody>,
+  res: Response<SignUpResBody>
 ) => {
   try {
-    const { name, email, password }: SignUpRequest = req.body;
+    const { name, email, password }: SignUpReqBody = req.body;
 
     const userCreated: IUser | null = await User.findOne({ email });
 

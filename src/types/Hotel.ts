@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { DefaultResponse } from "./Response";
+import { DefaultResBody } from "./Response";
 
 export interface Hotel {
   images?: string[] | null;
@@ -18,15 +18,24 @@ export interface Hotel {
   reservedBy?: Types.ObjectId | null;
 }
 
-export interface HotelDefaultResponse extends DefaultResponse {
+export interface HotelDefaultResBody extends DefaultResBody {
   content?: Hotel | null;
 }
 
-export interface HotelReadResponse extends DefaultResponse {
+export interface HotelReadResBody extends DefaultResBody {
   content?: Hotel[] | null;
 }
 
-export interface HotelCheckInRequest {
+export interface HotelFindReqQuery {
+  filter: string;
+  city: string;
+  state: string;
+  priceGte: number;
+  priceLte: number;
+  groupBy: string;
+}
+
+export interface HotelCheckInReqBody {
   reservationDate: Date;
   reservationQuantityDays: number;
 }

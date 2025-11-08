@@ -1,21 +1,22 @@
-import { HydratedDocument } from "mongoose";
+import { Double, HydratedDocument as Hydrated } from "mongoose";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { StatusResponse } from "../utils/enums";
-import Hotel from "../models/Hotel";
+import HotelModel from "../models/Hotel";
 import {
-  Hotel as IHotel,
-  HotelReadResponse,
-  HotelDefaultResponse,
-  HotelCheckInRequest,
-  IdRequest,
+  Hotel,
+  HotelReadResBody,
+  HotelDefaultResBody,
+  HotelCheckInReqBody,
+  IdReqParams,
   DefaultLocals,
-  DefaultResponse,
+  DefaultResBody,
+  HotelFindReqQuery,
 } from "../types";
 
-export const read = async (req: Request, res: Response<HotelReadResponse>) => {
+export const read = async (req: Request, res: Response<HotelReadResBody>) => {
   try {
-    const data: HydratedDocument<IHotel>[] | null = await Hotel.find({})
+    const data: Hydrated<Hotel>[] | null = await HotelModel.find()
       .populate("reservedBy")
       .sort({ createdAt: "desc" });
 
@@ -30,18 +31,54 @@ export const read = async (req: Request, res: Response<HotelReadResponse>) => {
   }
 };
 
-export const find = async () => {};
-
-export const findById = async (
-  req: Request<IdRequest>,
-  res: Response<HotelDefaultResponse>
+export const find = async (
+  req: Request<{}, {}, {}, HotelFindReqQuery>,
+  res: Response<HotelReadResBody>
 ) => {
   try {
-    const { id }: IdRequest = req.params;
+    const { filter, city, state, priceGte, priceLte, groupBy } = req.query;
 
-    const data: HydratedDocument<IHotel> | null = await Hotel.findById(
-      id
-    ).populate("reservedBy");
+    const query = HotelModel.find()
+      .or([
+        { title: new RegExp(filter, "i") },
+        { address: new RegExp(filter, "i") },
+      ])
+      .where({ city: new RegExp(city, "i") })
+      .where({ state: new RegExp(state, "i") })
+      .populate("reservedBy")
+      .sort({ createdAt: "desc" });
+
+    if (priceGte) {
+      query.where({ price: { $gte: priceGte } });
+    }
+
+    if (priceLte) {
+      query.where({ price: { $lte: priceLte } });
+    }
+
+    const data: Hydrated<Hotel>[] = await query.exec();
+
+    res
+      .status(StatusCodes.OK)
+      .json({ status: StatusResponse.OK, content: data });
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({
+      status: StatusResponse.ERROR,
+      message: `Erro ao filtrar. ${error}`,
+    });
+  }
+};
+
+export const findById = async (
+  req: Request<IdReqParams>,
+  res: Response<HotelDefaultResBody>
+) => {
+  try {
+    const { id }: IdReqParams = req.params;
+
+    const data: Hydrated<Hotel> | null = await HotelModel.findById(id).populate(
+      "reservedBy"
+    );
 
     res
       .status(StatusCodes.OK)
@@ -55,15 +92,15 @@ export const findById = async (
 };
 
 export const create = async (
-  req: Request<{}, {}, IHotel>,
-  res: Response<HotelDefaultResponse>
+  req: Request<{}, {}, Hotel>,
+  res: Response<HotelDefaultResBody>
 ) => {
   try {
-    const data: IHotel = req.body;
+    const data: Hotel = req.body;
 
-    const newData: HydratedDocument<IHotel> = await Hotel.create(data);
+    const newData: Hydrated<Hotel> = await HotelModel.create(data);
 
-    const populatedData: HydratedDocument<IHotel> | null = await Hotel.findById(
+    const populatedData: Hydrated<Hotel> | null = await HotelModel.findById(
       newData._id
     ).populate("reservedBy");
 
@@ -79,16 +116,16 @@ export const create = async (
 };
 
 export const update = async (
-  req: Request<IdRequest, {}, IHotel>,
-  res: Response<HotelDefaultResponse>
+  req: Request<IdReqParams, {}, Hotel>,
+  res: Response<HotelDefaultResBody>
 ) => {
   try {
-    const { id }: IdRequest = req.params;
+    const { id }: IdReqParams = req.params;
 
-    const data: IHotel = req.body;
+    const data: Hotel = req.body;
 
-    const updatedData: HydratedDocument<IHotel> | null =
-      await Hotel.findByIdAndUpdate(id, data, {
+    const updatedData: Hydrated<Hotel> | null =
+      await HotelModel.findByIdAndUpdate(id, data, {
         returnDocument: "after",
       }).populate("reservedBy");
 
@@ -104,15 +141,15 @@ export const update = async (
 };
 
 export const checkIn = async (
-  req: Request<IdRequest, {}, HotelCheckInRequest>,
-  res: Response<HotelDefaultResponse, DefaultLocals>
+  req: Request<IdReqParams, {}, HotelCheckInReqBody>,
+  res: Response<HotelDefaultResBody, DefaultLocals>
 ) => {
   try {
-    const { id }: IdRequest = req.params;
-    const data: HotelCheckInRequest = req.body;
+    const { id }: IdReqParams = req.params;
+    const data: HotelCheckInReqBody = req.body;
     const { user }: DefaultLocals = res.locals;
 
-    const hotel: HydratedDocument<IHotel> | null = await Hotel.findById(id);
+    const hotel: Hydrated<Hotel> | null = await HotelModel.findById(id);
 
     if (!hotel) {
       return res.status(StatusCodes.BAD_REQUEST).json({
@@ -135,7 +172,7 @@ export const checkIn = async (
 
     await hotel.save();
 
-    const populatedData: HydratedDocument<IHotel> | null = await Hotel.findById(
+    const populatedData: Hydrated<Hotel> | null = await HotelModel.findById(
       id
     ).populate("reservedBy");
 
@@ -153,13 +190,13 @@ export const checkIn = async (
 };
 
 export const checkOut = async (
-  req: Request<IdRequest>,
-  res: Response<HotelDefaultResponse>
+  req: Request<IdReqParams>,
+  res: Response<HotelDefaultResBody>
 ) => {
   try {
-    const { id }: IdRequest = req.params;
+    const { id }: IdReqParams = req.params;
 
-    const hotel: HydratedDocument<IHotel> | null = await Hotel.findById(id);
+    const hotel: Hydrated<Hotel> | null = await HotelModel.findById(id);
 
     if (!hotel) {
       return res.status(StatusCodes.BAD_REQUEST).json({
@@ -175,7 +212,7 @@ export const checkOut = async (
 
     await hotel.save();
 
-    const populatedData: HydratedDocument<IHotel> | null = await Hotel.findById(
+    const populatedData: Hydrated<Hotel> | null = await HotelModel.findById(
       id
     ).populate("reservedBy");
 
@@ -193,13 +230,13 @@ export const checkOut = async (
 };
 
 export const remove = async (
-  req: Request<IdRequest>,
-  res: Response<DefaultResponse>
+  req: Request<IdReqParams>,
+  res: Response<DefaultResBody>
 ) => {
   try {
-    const { id }: IdRequest = req.params;
+    const { id }: IdReqParams = req.params;
 
-    const data: IHotel | null = await Hotel.findById(id);
+    const data: Hotel | null = await HotelModel.findById(id);
 
     if (data?.reserved) {
       return res.status(StatusCodes.FORBIDDEN).json({
@@ -208,7 +245,7 @@ export const remove = async (
       });
     }
 
-    await Hotel.findByIdAndDelete(id);
+    await HotelModel.findByIdAndDelete(id);
 
     res.status(StatusCodes.NO_CONTENT).end();
   } catch (error) {

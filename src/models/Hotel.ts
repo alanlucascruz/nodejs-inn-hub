@@ -1,6 +1,5 @@
 import { model, Schema, Types } from "mongoose";
 import { Hotel } from "../types";
-import User from "./User";
 
 const Hotel = new Schema<Hotel>(
   {

@@ -1,6 +1,6 @@
-import { DefaultResponse } from "./Response";
+import { DefaultResBody } from "./Response";
 
-export interface SignInRequest {
+export interface SignInReqBody {
   email: string;
   password: string;
 }
@@ -11,11 +11,11 @@ export interface SignInContent {
   token: string;
 }
 
-export interface SignInResponse extends DefaultResponse {
+export interface SignInResBody extends DefaultResBody {
   content?: SignInContent;
 }
 
-export interface SignUpRequest {
+export interface SignUpReqBody {
   name: string;
   email: string;
   password: string;
@@ -27,6 +27,6 @@ export interface SignUpContent {
   token: string;
 }
 
-export interface SignUpResponse extends DefaultResponse {
+export interface SignUpResBody extends DefaultResBody {
   content?: SignUpContent;
 }

@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { StatusResponse } from "../utils/enums";
 
-export interface DefaultResponse {
+export interface DefaultResBody {
   status?: StatusResponse;
   message?: string;
   content?: any;
