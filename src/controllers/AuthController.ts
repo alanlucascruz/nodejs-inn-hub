@@ -1,10 +1,12 @@
-import User from "../models/User";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import { HydratedDocument } from "mongoose";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { StatusResponse } from "../utils/enums";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import User from "../models/User";
 import {
+  User as IUser,
   SignInRequest,
   SignInContent,
   SignInResponse,
@@ -20,9 +22,11 @@ export const signIn = async (
   res: Response<SignInResponse>
 ) => {
   try {
-    const { email, password } = req.body;
+    const { email, password }: SignInRequest = req.body;
 
-    const user = await User.findOne({ email });
+    const user: HydratedDocument<IUser> | null = await User.findOne({
+      email,
+    }).select("+password");
 
     const invalidPasswordResponse = () => {
       res.status(StatusCodes.UNAUTHORIZED).json({
@@ -52,8 +56,8 @@ export const signIn = async (
     res.json({ status: StatusResponse.OK, content });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({
-      message: `Erro ao entrar no sistema. ${error}`,
       status: StatusResponse.ERROR,
+      message: `Erro ao entrar no sistema. ${error}`,
     });
   }
 };
@@ -63,9 +67,9 @@ export const signUp = async (
   res: Response<SignUpResponse>
 ) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password }: SignUpRequest = req.body;
 
-    const userCreated = await User.findOne({ email });
+    const userCreated: IUser | null = await User.findOne({ email });
 
     if (userCreated) {
       return res.status(StatusCodes.CONFLICT).json({
@@ -76,13 +80,13 @@ export const signUp = async (
 
     const encryptedPassword: string = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
+    const user: HydratedDocument<IUser> = await User.create({
       name,
       email,
       password: encryptedPassword,
     });
 
-    const token = jwt.sign({ _id: user._id }, JWT_SECRET);
+    const token: string = jwt.sign({ _id: user._id }, JWT_SECRET);
 
     const content: SignUpContent = {
       email: user.email,
